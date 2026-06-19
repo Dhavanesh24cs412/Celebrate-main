@@ -1,0 +1,30 @@
+Tech Stack Breakdown for "Celebrate" Repository
+
+1. Primary Programming Languages
+   - TypeScript: The primary language used, as indicated by the presence of `typescript` in devDependencies, `tsconfig.json` files, and `.tsx` file extensions (e.g., `ProposalWizard.tsx`).
+   - HTML/CSS: Standard web technologies used alongside React, with CSS primarily managed through Tailwind CSS.
+
+2. Frontend Framework & Libraries
+   - React (v19.2.x): The core library for building the user interface.
+   - React DOM: Used for rendering React components in the browser.
+   - React Router (v7.17.x): Used for handling frontend routing and navigation.
+   - Lucide React: Used for consistent iconography across the UI.
+   - Date-fns: Used for manipulating and formatting dates.
+
+3. Backend Framework & Services
+   - Supabase: Acting as the Backend-as-a-Service (BaaS). The `@supabase/supabase-js` client indicates that authentication, database interactions, and backend services are entirely handled by Supabase.
+
+4. Database
+   - PostgreSQL (via Supabase): Since Supabase is the backend service provider, the underlying database technology is PostgreSQL.
+
+5. Build Tooling & Bundler
+   - Vite: A fast, modern build tool and development server used for this project (`vite` and `@vitejs/plugin-react`).
+
+6. Styling
+   - Tailwind CSS (v4.3.x): A utility-first CSS framework used for styling the application, integrated directly with Vite via `@tailwindcss/vite`.
+
+7. Package Manager
+   - npm: The presence of `package-lock.json` confirms that npm (Node Package Manager) is used for dependency management.
+
+8. Code Quality & Linting
+   - ESLint: Used for identifying and reporting on patterns in the JavaScript/TypeScript code, with specific plugins for React hooks and refresh.
