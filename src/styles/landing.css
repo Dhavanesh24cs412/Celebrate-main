@@ -1,0 +1,333 @@
+@import url('https://fonts.googleapis.com/css2?family=Alex+Brush&family=Inter:wght@300;400;500;600&family=Playfair+Display:ital,wght@0,400;0,600;1,400;1,600&family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap');
+
+:root {
+  /* Colors from Mockup */
+  --primary: #4A1B6B;
+  /* Dark Purple */
+  --primary-light: #6C2B9C;
+  --primary-dark: #32114A;
+
+  --secondary: #E399A1;
+  /* Soft Pink / Rose */
+  --secondary-light: #F4D5D9;
+
+  --tertiary: #E5B869;
+  /* Gold / Yellow */
+  --tertiary-hover: #D4A352;
+
+  --neutral-dark: #1A1A1A;
+  --neutral-gray: #666666;
+  --neutral-light: #F9F9F9;
+  --white: #FFFFFF;
+
+  --bg-color: #FAFAF9;
+  /* Very light cream background */
+
+  /* Typography */
+  --font-sans: 'Plus Jakarta Sans', sans-serif;
+  --font-serif: 'Playfair Display', serif;
+  --font-body: 'Inter', sans-serif;
+  --font-logo: 'Alex Brush', cursive;
+
+  /* Spacing */
+  --section-padding: 3rem 2rem;
+  --nav-height: 5rem;
+
+  /* Shadows & Glassmorphism */
+  --shadow-sm: 0 4px 10px rgba(0, 0, 0, 0.03);
+  --shadow-md: 0 10px 20px rgba(74, 27, 107, 0.05);
+  --shadow-lg: 0 20px 40px rgba(74, 27, 107, 0.08);
+
+  --glass-bg: rgba(255, 255, 255, 0.9);
+  --glass-border: rgba(255, 255, 255, 0.6);
+
+  /* Transitions */
+  --transition: all 0.4s cubic-bezier(0.25, 1, 0.5, 1);
+}
+
+/* Base Styles */
+:where(.landing-page-scope) * {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+.landing-page-scope {
+  /* scroll-behavior: smooth; Removed for GSAP snap scrolling */
+}
+
+.landing-page-scope {
+  font-family: var(--font-body);
+  color: var(--neutral-dark);
+  background-color: var(--bg-color);
+  line-height: 1.6;
+  overflow-x: hidden;
+  /* Add subtle background pattern or gradients globally */
+  background-image:
+    radial-gradient(circle at 80% 20%, rgba(227, 153, 161, 0.08) 0%, transparent 40%),
+    radial-gradient(circle at 20% 80%, rgba(74, 27, 107, 0.05) 0%, transparent 40%);
+}
+
+:where(.landing-page-scope) h1,
+:where(.landing-page-scope) h2,
+:where(.landing-page-scope) h3,
+:where(.landing-page-scope) h4,
+:where(.landing-page-scope) h5,
+:where(.landing-page-scope) h6 {
+  font-family: var(--font-sans);
+  color: var(--primary);
+  line-height: 1.2;
+}
+
+.font-serif {
+  font-family: var(--font-serif);
+}
+
+.font-logo {
+  font-family: var(--font-logo);
+  font-size: 1.2em;
+}
+
+.text-italic {
+  font-style: italic;
+}
+
+:where(.landing-page-scope) a {
+  text-decoration: none;
+  color: inherit;
+  transition: var(--transition);
+}
+
+:where(.landing-page-scope) ul {
+  list-style: none;
+}
+
+:where(.landing-page-scope) img {
+  max-width: 100%;
+  display: block;
+}
+
+/* Utilities */
+.container {
+  max-width: 1300px;
+  margin: 0 auto;
+  padding: 0 2rem;
+  width: 100%;
+}
+
+.section {
+  padding: var(--section-padding);
+}
+
+.text-center {
+  text-align: center;
+}
+
+.card {
+  background: var(--white);
+  border-radius: 1rem;
+  box-shadow: var(--shadow-sm);
+  transition: var(--transition);
+  border: 1px solid rgba(0, 0, 0, 0.03);
+}
+
+.card:hover {
+  box-shadow: var(--shadow-md);
+  transform: translateY(-3px);
+}
+
+/* Buttons */
+.snap-section {
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-start;
+  padding-top: calc(var(--nav-height) + 1rem);
+  padding-bottom: 2rem;
+}
+
+/* Safely center the container vertically without clipping the top */
+.snap-section > .container {
+  margin-top: auto;
+  margin-bottom: auto;
+}
+
+.btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  padding: 0.75rem 1.75rem;
+  border-radius: 9999px;
+  /* Pill shape */
+  font-weight: 600;
+  font-family: var(--font-sans);
+  font-size: 0.95rem;
+  cursor: pointer;
+  transition: var(--transition);
+  border: 2px solid transparent;
+  outline: none;
+}
+
+.btn-primary {
+  background-color: var(--primary);
+  color: var(--white);
+}
+
+.btn-primary:hover {
+  background-color: var(--primary-light);
+  transform: translateY(-2px);
+}
+
+.btn-secondary {
+  background-color: transparent;
+  color: var(--primary);
+  border-color: var(--primary);
+}
+
+.btn-secondary:hover {
+  background-color: rgba(74, 27, 107, 0.05);
+}
+
+.btn-gold {
+  background-color: var(--tertiary);
+  color: var(--primary);
+}
+
+.btn-gold:hover {
+  background-color: var(--tertiary-hover);
+  transform: translateY(-2px);
+}
+
+/* Section Headers */
+.section-header {
+  margin-bottom: 3.5rem;
+  text-align: center;
+}
+
+.section-header h2 {
+  font-size: 2.25rem;
+  margin-bottom: 0.75rem;
+  color: var(--primary);
+  font-weight: 700;
+}
+
+.section-header p {
+  font-size: 1.125rem;
+  color: var(--neutral-gray);
+  max-width: 600px;
+  margin: 0 auto;
+}
+
+@media (max-width: 768px) {
+  :root {
+    --section-padding: 2rem 1.5rem;
+    --nav-height: 4rem;
+  }
+
+  .container {
+    padding: 0 1.5rem;
+  }
+
+  .section-header {
+    margin-bottom: 2rem;
+  }
+
+  .section-header h2 {
+    font-size: 1.75rem;
+  }
+
+  .section-header p {
+    font-size: 1rem;
+  }
+
+  :where(.landing-page-scope) h1 {
+    font-size: 2.25rem !important;
+  }
+
+  :where(.landing-page-scope) h2 {
+    font-size: 1.75rem !important;
+  }
+
+  :where(.landing-page-scope) h3 {
+    font-size: 1.5rem !important;
+  }
+}
+
+/* Animations */
+@keyframes fadeInUp {
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.animate-fade-in-up {
+  animation: fadeInUp 0.8s ease-out forwards;
+}
+
+.delay-100 {
+  animation-delay: 100ms;
+}
+
+.delay-200 {
+  animation-delay: 200ms;
+}
+
+.delay-300 {
+  animation-delay: 300ms;
+}
+
+/* Scroll Reveal Animations */
+.reveal {
+  opacity: 0;
+  transition: all 0.8s cubic-bezier(0.25, 1, 0.5, 1);
+  will-change: opacity, transform;
+}
+
+.reveal.is-visible {
+  opacity: 1;
+  transform: none;
+}
+
+.reveal-up {
+  transform: translateY(40px);
+}
+
+.reveal-down {
+  transform: translateY(-40px);
+}
+
+.reveal-left {
+  transform: translateX(-40px);
+}
+
+.reveal-right {
+  transform: translateX(40px);
+}
+
+.reveal-zoom {
+  transform: scale(0.95);
+}
+
+/* Delay modifiers for stagger effects */
+.reveal-delay-100 {
+  transition-delay: 100ms;
+}
+
+.reveal-delay-200 {
+  transition-delay: 200ms;
+}
+
+.reveal-delay-300 {
+  transition-delay: 300ms;
+}
+
+.reveal-delay-400 {
+  transition-delay: 400ms;
+}

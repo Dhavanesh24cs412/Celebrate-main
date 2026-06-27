@@ -10,25 +10,37 @@ interface ProtectedRouteProps {
 }
 
 export const ProtectedRoute = ({ allowedRoles, requireOnboarding = true }: ProtectedRouteProps) => {
-  const { user, profile, loading } = useAuth();
+  const { user, profile, profileStatus, loading } = useAuth();
   const location = useLocation();
 
-  if (loading) {
+  if (loading || profileStatus === 'loading') {
     return <LoadingState message="Checking authentication..." />;
   }
 
-  if (!user) {
+  if (profileStatus === 'anonymous') {
     // Save the intended route and redirect to login
     return <Navigate to="/login" state={{ from: location }} replace />;
   }
 
+  if (profileStatus === 'error') {
+    return (
+      <div className="min-h-screen bg-brand-background flex items-center justify-center p-6">
+        <div className="text-center">
+          <h2 className="text-2xl font-bold text-primary mb-2">Connection Error</h2>
+          <p className="text-text/70 mb-4">Failed to load profile. Please refresh to try again.</p>
+          <button onClick={() => window.location.reload()} className="btn btn-primary">Refresh Page</button>
+        </div>
+      </div>
+    );
+  }
+
   // If user is logged in but hasn't selected a role, force role selection unless they are already there
-  if (!profile && location.pathname !== '/select-role') {
+  if (profileStatus === 'not_found' && location.pathname !== '/select-role') {
     return <Navigate to="/select-role" replace />;
   }
 
   // If profile exists
-  if (profile) {
+  if (profileStatus === 'ready' && profile) {
     // Role Check
     if (allowedRoles && !allowedRoles.includes(profile.role)) {
       // Redirect to their own dashboard

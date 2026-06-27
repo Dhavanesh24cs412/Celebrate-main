@@ -12,7 +12,7 @@ import { getRelativeTime } from '../../lib/dateUtils';
 import { formatEstimatedBudget } from '../../lib/formatters';
 import { Filter, Edit2, Send, Trash2, Eye, X, AlertCircle } from 'lucide-react';
 
-type JoinedProposal = Proposal & { events: Pick<CelebrateEvent, 'title' | 'event_type'> | null };
+type JoinedProposal = Proposal & { events: Pick<CelebrateEvent, 'title' | 'event_type' | 'selected_proposal_id'> & { profiles?: { full_name: string | null, phone: string | null } | null } | null };
 
 export const PlannerMySubmissions = () => {
   const { user } = useAuth();
@@ -46,7 +46,15 @@ export const PlannerMySubmissions = () => {
         .from('proposals')
         .select(`
           *,
-          events:event_id (title, event_type)
+          events:event_id (
+            title, 
+            event_type, 
+            selected_proposal_id,
+            profiles (
+              full_name,
+              phone
+            )
+          )
         `)
         .eq('planner_profile_id', profileData.id)
         .order('updated_at', { ascending: false });
@@ -66,13 +74,18 @@ export const PlannerMySubmissions = () => {
             const eventIds = rawP.map(p => p.event_id);
             const { data: eventsData, error: eError } = await supabase
               .from('events')
-              .select('id, title, event_type')
+              .select('id, title, event_type, selected_proposal_id, profiles(full_name, phone)')
               .in('id', eventIds);
             
             if (eError) throw eError;
             
             const eMap: Record<string, any> = {};
-            eventsData.forEach(e => eMap[e.id] = { title: e.title, event_type: e.event_type });
+            eventsData.forEach(e => eMap[e.id] = { 
+              title: e.title, 
+              event_type: e.event_type,
+              selected_proposal_id: e.selected_proposal_id,
+              profiles: Array.isArray(e.profiles) ? e.profiles[0] : e.profiles
+            });
             
             const merged = rawP.map(p => ({
                ...p,
@@ -361,6 +374,22 @@ export const PlannerMySubmissions = () => {
                   <span className="font-medium text-gray-900">{formatEstimatedBudget(viewingProposal.estimated_budget_lakhs)}</span>
                 </div>
               </div>
+
+              {viewingProposal.id === viewingProposal.events?.selected_proposal_id && viewingProposal.events?.profiles && (
+                <div>
+                  <h4 className="text-sm font-semibold text-gray-900 uppercase tracking-wider mb-2 font-inter">Client Details</h4>
+                  <div className="bg-green-50 border border-green-100 p-4 rounded-xl text-gray-900 font-inter">
+                    <div className="flex justify-between mb-2">
+                      <span className="text-gray-600">Name</span>
+                      <span className="font-semibold">{viewingProposal.events.profiles.full_name || 'Not Provided'}</span>
+                    </div>
+                    <div className="flex justify-between">
+                      <span className="text-gray-600">Phone</span>
+                      <span className="font-semibold">{viewingProposal.events.profiles.phone || 'Not Provided'}</span>
+                    </div>
+                  </div>
+                </div>
+              )}
 
               <div>
                 <h4 className="text-sm font-semibold text-gray-900 uppercase tracking-wider mb-2 font-inter">Short Description</h4>

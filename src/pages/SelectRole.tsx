@@ -8,16 +8,16 @@ import { User as UserIcon, Briefcase } from 'lucide-react';
 import { UserRole } from '../types';
 
 export const SelectRole = () => {
-  const { user, profile, refreshProfile } = useAuth();
+  const { user, profile, profileStatus, refreshProfile } = useAuth();
   const navigate = useNavigate();
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
-    if (profile) {
+    if (profileStatus === 'ready' && profile) {
       navigate(`/onboarding/${profile.role}`, { replace: true });
     }
-  }, [profile, navigate]);
+  }, [profileStatus, profile, navigate]);
 
   const handleRoleSelection = async (role: UserRole) => {
     if (!user) return;

@@ -48,6 +48,7 @@ export interface CelebrateEvent {
   selected_proposal_id: string | null;
   created_at: string;
   updated_at: string;
+  profiles?: Pick<Profile, 'full_name' | 'phone'> | null;
 }
 
 export interface EventRequirement {
@@ -94,6 +95,7 @@ export interface Proposal {
   status_changed_at: string;
   created_at: string;
   updated_at: string;
+  planner_profiles?: Pick<PlannerProfile, 'profile_id' | 'business_name' | 'logo_url' | 'short_bio' | 'years_experience' | 'team_size' | 'services'> | null;
 }
 
 export type NotificationType = 'EVENT_CREATED' | 'PROPOSAL_SUBMITTED' | 'PROPOSAL_ACCEPTED' | 'PROPOSAL_REJECTED' | 'EVENT_BOOKED' | 'EVENT_COMPLETED' | 'SYSTEM';

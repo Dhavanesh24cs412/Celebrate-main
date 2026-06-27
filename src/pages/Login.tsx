@@ -1,59 +1,167 @@
 import React, { useEffect } from 'react';
-import { useNavigate, useLocation } from 'react-router-dom';
+import { useLocation } from 'react-router-dom';
 import { useAuth } from '../contexts/AuthContext';
 import { supabase } from '../lib/supabase';
-import { Button } from '../components/ui/Button';
 import { LoadingState } from '../components/ui/LoadingState';
 
+import Navbar from '../components/landing/Navbar';
+import Hero from '../components/landing/Hero';
+import TrustedBy from '../components/landing/TrustedBy';
+import About from '../components/landing/About';
+import Categories from '../components/landing/Categories';
+import HowItWorks from '../components/landing/HowItWorks';
+import Services from '../components/landing/Services';
+import ValueProposition from '../components/landing/ValueProposition';
+import Testimonials from '../components/landing/Testimonials';
+import FAQ from '../components/landing/FAQ';
+import Contact from '../components/landing/Contact';
+import CTABanner from '../components/landing/CTABanner';
+import ContactFooter from '../components/landing/ContactFooter';
+
+import { gsap } from "gsap";
+import { ScrollTrigger } from "gsap/ScrollTrigger";
+import { useGSAP } from "@gsap/react";
+import Lenis from 'lenis';
+
+import '../styles/landing.css';
+import '../styles/landing-app.css';
+
+gsap.registerPlugin(ScrollTrigger);
+
 export const Login = () => {
-  const { user, profile, loading } = useAuth();
-  const navigate = useNavigate();
+  const { user, loading } = useAuth();
   const location = useLocation();
 
-  useEffect(() => {
-    if (user && !loading) {
-      if (!profile) {
-        navigate('/select-role', { replace: true });
-      } else if (!profile.onboarding_completed) {
-        navigate(`/onboarding/${profile.role}`, { replace: true });
-      } else {
-        const destination = location.state?.from?.pathname || `/${profile.role}/dashboard`;
-        navigate(destination, { replace: true });
-      }
-    }
-  }, [user, profile, loading, navigate, location]);
-
   const handleGoogleLogin = async () => {
+    // Preserve full route fidelity (pathname + search + hash)
+    const fromState = location.state?.from;
+    const nextRoute = fromState 
+      ? `${fromState.pathname}${fromState.search}${fromState.hash}`
+      : '';
+    
+    const baseUrl = `${window.location.origin}/auth/callback`;
+    const redirectTo = nextRoute 
+      ? `${baseUrl}?next=${encodeURIComponent(nextRoute)}`
+      : baseUrl;
+      
     await supabase.auth.signInWithOAuth({
       provider: 'google',
-      options: {
-        redirectTo: window.location.origin,
-      }
+      options: { redirectTo }
     });
   };
+
+  useEffect(() => {
+    // Only initialize Lenis and animations if we aren't loading
+    if (loading) return;
+
+    // Initialize Lenis for smooth scrolling
+    const lenis = new Lenis({
+      duration: 1.2,
+      easing: (t) => Math.min(1, 1.001 - Math.pow(2, -10 * t)), 
+      mouseMultiplier: 1,
+      touchMultiplier: 2,
+      infinite: false,
+    } as any);
+
+    // Globally intercept anchor links to use Lenis smooth scrolling
+    const handleAnchorClick = (e: MouseEvent) => {
+      const target = (e.target as HTMLElement).closest('a');
+      if (target && target.hash && target.hash.length > 1) {
+        try {
+          const el = document.querySelector(target.hash);
+          if (el) {
+            e.preventDefault();
+            lenis.scrollTo(el as HTMLElement, { offset: -80, duration: 1.5 });
+          }
+        } catch (err) {
+          // Ignore invalid selectors like "#"
+        }
+      }
+    };
+    document.addEventListener('click', handleAnchorClick);
+
+    lenis.on('scroll', ScrollTrigger.update);
+
+    gsap.ticker.add((time) => {
+      lenis.raf(time * 1000);
+    });
+
+    gsap.ticker.lagSmoothing(0);
+
+    // Setup Intersection Observer for reveal animations
+    const observer = new IntersectionObserver((entries) => {
+      entries.forEach((entry) => {
+        if (entry.isIntersecting) {
+          entry.target.classList.add('is-visible');
+        }
+      });
+    }, { threshold: 0.1, rootMargin: '0px 0px -50px 0px' });
+
+    const revealElements = document.querySelectorAll('.reveal');
+    revealElements.forEach((el) => observer.observe(el));
+
+    return () => {
+      lenis.destroy();
+      document.removeEventListener('click', handleAnchorClick);
+      revealElements.forEach((el) => observer.unobserve(el));
+      // Ensure we clear out the gsap ticker to prevent memory leaks across routes
+      gsap.ticker.remove(lenis.raf);
+    };
+  }, [loading]);
+
+  useGSAP(() => {
+    if (loading) return;
+
+    // Wait for images to load, then calculate snap points
+    const timeout = setTimeout(() => {
+      ScrollTrigger.refresh();
+
+      let panels = gsap.utils.toArray(".snap-section");
+
+      ScrollTrigger.create({
+        trigger: ".app-container",
+        start: "top top",
+        end: "bottom bottom",
+        snap: {
+          snapTo: (progress, self) => {
+            let snapPoints = panels.map((panel: any) => panel.offsetTop / self!.end);
+            if (snapPoints.length === 0) return progress;
+            let closest = snapPoints.reduce((prev: any, curr: any) =>
+              Math.abs(curr - progress) < Math.abs(prev - progress) ? curr : prev
+            );
+            return closest;
+          },
+          duration: { min: 0.3, max: 0.8 },
+          delay: 0.05,
+          ease: "power3.inOut"
+        }
+      });
+    }, 500);
+
+    return () => clearTimeout(timeout);
+  }, [loading]);
 
   if (loading) return <LoadingState />;
 
   return (
-    <div className="min-h-screen bg-brand-background flex flex-col items-center justify-center p-6">
-      <div className="w-full max-w-md bg-surface p-8 rounded-[24px] shadow-sm text-center">
-        <h1 className="text-4xl font-poppins font-bold text-primary mb-2">Celebrate</h1>
-        <p className="text-text/70 font-inter mb-10">Your perfect event, perfectly planned.</p>
-        
-        <Button 
-          fullWidth 
-          size="lg" 
-          onClick={handleGoogleLogin}
-          className="gap-3"
-        >
-          <svg className="w-6 h-6" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-            <path d="M22.56 12.25C22.56 11.47 22.49 10.72 22.36 10H12V14.26H17.92C17.66 15.63 16.88 16.8 15.72 17.58V20.34H19.29C21.37 18.42 22.56 15.6 22.56 12.25Z" fill="#4285F4"/>
-            <path d="M12 23C14.97 23 17.46 22.02 19.29 20.34L15.72 17.58C14.73 18.24 13.47 18.64 12 18.64C9.15 18.64 6.74 16.72 5.86 14.13H2.17V16.99C3.98 20.59 7.68 23 12 23Z" fill="#34A853"/>
-            <path d="M5.86 14.13C5.63 13.47 5.5 12.75 5.5 12C5.5 11.25 5.63 10.53 5.86 9.87V7.01H2.17C1.43 8.49 1 10.18 1 12C1 13.82 1.43 15.51 2.17 16.99L5.86 14.13Z" fill="#FBBC05"/>
-            <path d="M12 5.38C13.62 5.38 15.06 5.94 16.2 7.03L19.37 3.86C17.46 2.07 14.97 1 12 1C7.68 1 3.98 3.41 2.17 7.01L5.86 9.87C6.74 7.28 9.15 5.38 12 5.38Z" fill="#EA4335"/>
-          </svg>
-          Continue with Google
-        </Button>
+    <div className="landing-page-scope">
+      <div className="app-container">
+        <Navbar onGoogleLogin={handleGoogleLogin} />
+        <Hero />
+        <TrustedBy />
+
+        <Categories />
+        <HowItWorks />
+
+        <About />
+        <Services />
+        <ValueProposition />
+        <Testimonials />
+        <FAQ />
+        <Contact />
+
+        <CTABanner onGoogleLogin={handleGoogleLogin} />
+        <ContactFooter />
       </div>
     </div>
   );

@@ -1,0 +1,65 @@
+.trusted-by-section {
+  position: relative;
+  z-index: 10;
+  margin-top: -5rem; /* Pull up to overlap hero */
+  margin-bottom: 4rem;
+}
+
+.trusted-by-card {
+  background: var(--white);
+  border-radius: 3rem;
+  padding: 1rem 2rem;
+  max-width: 900px;
+  margin: 0 auto;
+  box-shadow: 0 10px 40px rgba(74, 27, 107, 0.08);
+  text-align: center;
+  border: 1px solid rgba(255,255,255,0.5);
+}
+
+.trusted-by-text {
+  font-size: 0.85rem;
+  color: var(--neutral-gray);
+  margin-bottom: 1.5rem;
+  font-weight: 500;
+}
+
+.trusted-by-logos {
+  display: flex;
+  justify-content: space-around;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 2rem;
+}
+
+.partner-logo {
+  font-size: 1.1rem;
+  opacity: 0.8;
+  letter-spacing: 1px;
+}
+
+.serif-logo {
+  font-family: var(--font-serif);
+}
+
+.script-logo {
+  font-family: var(--font-serif);
+  font-style: italic;
+}
+
+.stacked {
+  display: flex;
+  flex-direction: column;
+  line-height: 1.1;
+  font-size: 0.9rem;
+}
+
+.text-gold { color: var(--tertiary); }
+.text-dark { color: #333; }
+.text-rose { color: #C26B76; } /* Deeper rose */
+.text-purple { color: var(--primary); }
+
+@media (max-width: 768px) {
+  .trusted-by-section {
+    margin-top: 2rem;
+  }
+}

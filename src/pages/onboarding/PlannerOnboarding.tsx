@@ -5,16 +5,17 @@ import { supabase } from '../../lib/supabase';
 import { Button } from '../../components/ui/Button';
 import { Input } from '../../components/ui/Input';
 import { Camera, Check, Upload, Image as ImageIcon, X } from 'lucide-react';
+import { uploadProfileImage } from '../../lib/storageUtils';
 
-const SERVICES = [
+export const SERVICES = [
   'Food & Catering', 'DJ', 'VJ', 'Music Party', 'Event Hosts',
   'Events Desk', 'Decor', 'Venues', 'Photography', 'Videography',
   'Sound Systems', 'Lightings', 'Invitations & Gifting',
   'Bride Styling', 'Groom Styling', 'Rituals', 'Other Entertainments'
 ];
 
-const EXPERIENCE_OPTIONS = ['1-3', '3-5', '5-10', '10+'];
-const TEAM_SIZE_OPTIONS = ['1-5', '5-20', '20-50', '50+'];
+export const EXPERIENCE_OPTIONS = ['1-3', '3-5', '5-10', '10+'];
+export const TEAM_SIZE_OPTIONS = ['1-5', '5-20', '20-50', '50+'];
 
 export const PlannerOnboarding = () => {
   const { user, profile, refreshProfile } = useAuth();
@@ -80,23 +81,8 @@ export const PlannerOnboarding = () => {
 
       setIsUploadingLogo(true);
       try {
-        if (logoPreview && logoPreview.includes(user.id)) {
-           const urlObj = new URL(logoPreview);
-           const pathParts = urlObj.pathname.split('/planner-logos/');
-           if (pathParts.length > 1) {
-             await supabase.storage.from('planner-logos').remove([pathParts[1]]);
-           }
-        }
-
-        const fileExt = file.name.split('.').pop();
-        const fileName = `logo-${user.id}-${Math.random()}.${fileExt}`;
-        const filePath = `${user.id}/${fileName}`;
-
-        const { error } = await supabase.storage.from('planner-logos').upload(filePath, file, { upsert: true });
-        if (error) throw error;
-
-        const { data } = supabase.storage.from('planner-logos').getPublicUrl(filePath);
-        setLogoPreview(data.publicUrl);
+        const newUrl = await uploadProfileImage(file, 'planner-logos', user.id, 'logo', logoPreview);
+        setLogoPreview(newUrl);
       } catch (err: any) {
         setErrors(prev => ({ ...prev, logo: 'Failed to upload logo' }));
       } finally {
@@ -118,23 +104,8 @@ export const PlannerOnboarding = () => {
       setIsUploadingPortfolio(prev => { const n = [...prev]; n[index] = true; return n; });
       try {
         const oldPreview = portfolioPreviews[index];
-        if (oldPreview && oldPreview.includes(user.id)) {
-           const urlObj = new URL(oldPreview);
-           const pathParts = urlObj.pathname.split('/planner-portfolios/');
-           if (pathParts.length > 1) {
-             await supabase.storage.from('planner-portfolios').remove([pathParts[1]]);
-           }
-        }
-
-        const fileExt = file.name.split('.').pop();
-        const fileName = `portfolio-${index}-${user.id}-${Math.random()}.${fileExt}`;
-        const filePath = `${user.id}/${fileName}`;
-
-        const { error } = await supabase.storage.from('planner-portfolios').upload(filePath, file, { upsert: true });
-        if (error) throw error;
-
-        const { data } = supabase.storage.from('planner-portfolios').getPublicUrl(filePath);
-        setPortfolioPreviews(prev => { const n = [...prev]; n[index] = data.publicUrl; return n; });
+        const newUrl = await uploadProfileImage(file, 'planner-portfolios', user.id, `portfolio-${index}`, oldPreview);
+        setPortfolioPreviews(prev => { const n = [...prev]; n[index] = newUrl; return n; });
       } catch (err: any) {
         setErrors(prev => ({ ...prev, portfolio: 'Failed to upload image' }));
       } finally {

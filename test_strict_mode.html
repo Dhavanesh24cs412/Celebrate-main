@@ -1,0 +1,67 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <script crossorigin src="https://unpkg.com/react@18/umd/react.development.js"></script>
+  <script crossorigin src="https://unpkg.com/react-dom@18/umd/react-dom.development.js"></script>
+  <script crossorigin src="https://unpkg.com/babel-standalone@6/babel.min.js"></script>
+</head>
+<body>
+  <div id="root"></div>
+  <script type="text/babel">
+    const { useState, useEffect } = React;
+
+    function PreviewImage({ file }) {
+      const [url, setUrl] = useState('');
+      
+      useEffect(() => {
+        const objectUrl = URL.createObjectURL(file);
+        console.log(`[DEBUG] ${performance.now().toFixed(1)} Object URL created: ${objectUrl}`);
+        setUrl(objectUrl);
+        return () => {
+          console.log(`[DEBUG] ${performance.now().toFixed(1)} URL revoked: ${objectUrl}`);
+          URL.revokeObjectURL(objectUrl);
+        };
+      }, [file]);
+      
+      useEffect(() => {
+        return () => console.log(`[DEBUG] ${performance.now().toFixed(1)} Component unmounted`);
+      }, []);
+      
+      console.log(`[DEBUG] ${performance.now().toFixed(1)} previewUrl state updated: ${url}`);
+      
+      return url ? <img 
+        src={url} 
+        onLoad={() => console.log(`[DEBUG] ${performance.now().toFixed(1)} Native onLoad event: ${url}`)} 
+        onError={() => console.log(`[DEBUG] ${performance.now().toFixed(1)} Native onError event: ${url}`)}
+      /> : null;
+    }
+
+    function App() {
+      const [file, setFile] = useState(null);
+      
+      useEffect(() => {
+        // Create a dummy 1x1 PNG file
+        const base64 = "iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAACklEQVR4nGMAAQAABQABDQottAAAAABJRU5ErkJggg==";
+        const byteCharacters = atob(base64);
+        const byteNumbers = new Array(byteCharacters.length);
+        for (let i = 0; i < byteCharacters.length; i++) {
+          byteNumbers[i] = byteCharacters.charCodeAt(i);
+        }
+        const byteArray = new Uint8Array(byteNumbers);
+        const blob = new Blob([byteArray], {type: 'image/png'});
+        const f = new File([blob], 'dummy.png', { type: 'image/png' });
+        
+        setTimeout(() => {
+          console.log(`[DEBUG] ${performance.now().toFixed(1)} Extraction completes. Setting file...`);
+          setFile(f);
+        }, 500);
+      }, []);
+      
+      return file ? <PreviewImage file={file} /> : null;
+    }
+
+    const root = ReactDOM.createRoot(document.getElementById('root'));
+    root.render(<React.StrictMode><App /></React.StrictMode>);
+  </script>
+</body>
+</html>

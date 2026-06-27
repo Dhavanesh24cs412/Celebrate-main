@@ -62,7 +62,18 @@ export const ProposalReview = () => {
       // Fetch Proposals (Drafts are blocked by RLS, but we filter explicitly)
       const { data: pData, error: pError } = await supabase
         .from('proposals')
-        .select('*')
+        .select(`
+          *,
+          planner_profiles(
+            profile_id,
+            business_name,
+            logo_url,
+            short_bio,
+            years_experience,
+            team_size,
+            services
+          )
+        `)
         .eq('event_id', eventId)
         .neq('status', 'Draft')
         .order('submitted_at', { ascending: true });
@@ -214,7 +225,9 @@ export const ProposalReview = () => {
                     >
                       <td className="px-6 py-4 font-semibold flex items-center gap-2">
                         <User className="w-4 h-4 text-primary" />
-                        {anonymousMapping.get(proposal.planner_profile_id)}
+                        {event.selected_proposal_id === proposal.id && proposal.planner_profiles 
+                          ? proposal.planner_profiles.business_name 
+                          : anonymousMapping.get(proposal.planner_profile_id)}
                       </td>
                       <td className="px-6 py-4 font-medium">{formatEstimatedBudget(proposal.estimated_budget_lakhs)}</td>
                       <td className="px-6 py-4 text-gray-600">
@@ -242,7 +255,11 @@ export const ProposalReview = () => {
                     <div className="flex justify-between items-start mb-4">
                       <div className="flex items-center gap-2 bg-gray-100 px-3 py-1 rounded-full">
                          <User className="w-3 h-3 text-gray-600" />
-                         <span className="text-xs font-semibold text-gray-700">{anonymousMapping.get(proposal.planner_profile_id)}</span>
+                         <span className="text-xs font-semibold text-gray-700">
+                           {event.selected_proposal_id === proposal.id && proposal.planner_profiles 
+                             ? proposal.planner_profiles.business_name 
+                             : anonymousMapping.get(proposal.planner_profile_id)}
+                         </span>
                       </div>
                       <EventStatusBadge status={proposal.status as any} />
                     </div>
@@ -263,13 +280,23 @@ export const ProposalReview = () => {
                       </div>
                     </div>
 
-                    <Button 
-                      variant="outline" 
-                      className="w-full"
-                      onClick={() => setViewingProposal(proposal)}
-                    >
-                      View Full Proposal
-                    </Button>
+                     {event.selected_proposal_id === proposal.id && proposal.planner_profiles ? (
+                       <Button 
+                         variant="primary" 
+                         className="w-full"
+                         onClick={() => navigate(`/client/planners/${proposal.planner_profile_id}`)}
+                       >
+                         View Full Profile
+                       </Button>
+                     ) : (
+                       <Button 
+                         variant="outline" 
+                         className="w-full"
+                         onClick={() => setViewingProposal(proposal)}
+                       >
+                         View Full Proposal
+                       </Button>
+                     )}
                  </div>
                ))}
              </div>

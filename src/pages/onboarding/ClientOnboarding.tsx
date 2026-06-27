@@ -2,11 +2,12 @@ import React, { useState, useRef, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../../contexts/AuthContext';
 import { supabase } from '../../lib/supabase';
+import { uploadProfileImage } from '../../lib/storageUtils';
 import { Button } from '../../components/ui/Button';
 import { Input } from '../../components/ui/Input';
 import { Camera, Check } from 'lucide-react';
 
-const EVENT_TYPES = [
+export const EVENT_TYPES = [
   'Wedding',
   'Reception',
   'Birthday',
@@ -66,24 +67,8 @@ export const ClientOnboarding = () => {
       
       setIsUploading(true);
       try {
-        // Cleanup old temp file if it exists and belongs to this user
-        if (avatarPreview && avatarPreview.includes(user.id)) {
-           const urlObj = new URL(avatarPreview);
-           const pathParts = urlObj.pathname.split('/avatars/');
-           if (pathParts.length > 1) {
-             await supabase.storage.from('avatars').remove([pathParts[1]]);
-           }
-        }
-
-        const fileExt = file.name.split('.').pop();
-        const fileName = `${user.id}-avatar-${Math.random()}.${fileExt}`;
-        const filePath = `${user.id}/${fileName}`;
-
-        const { error: uploadError } = await supabase.storage.from('avatars').upload(filePath, file, { upsert: true });
-        if (uploadError) throw uploadError;
-
-        const { data } = supabase.storage.from('avatars').getPublicUrl(filePath);
-        setAvatarPreview(data.publicUrl);
+        const newUrl = await uploadProfileImage(file, 'avatars', user.id, 'avatar', avatarPreview);
+        setAvatarPreview(newUrl);
       } catch (err: any) {
         setErrors(prev => ({ ...prev, avatar: 'Failed to upload image' }));
       } finally {

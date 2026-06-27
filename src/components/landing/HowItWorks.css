@@ -1,0 +1,105 @@
+.how-it-works-section {
+  background: transparent;
+}
+
+.text-dark {
+  color: var(--neutral-dark) !important;
+  display: inline-block;
+}
+
+.steps-container {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 2rem;
+  position: relative;
+  margin-top: 2rem;
+}
+
+.connecting-line {
+  position: absolute;
+  top: 50px;
+  left: 10%;
+  right: 10%;
+  height: 0;
+  border-top: 2px dashed rgba(0,0,0,0.1);
+  z-index: 0;
+}
+
+.step-card {
+  position: relative;
+  z-index: 1;
+  text-align: center;
+  padding: 0 1rem;
+}
+
+.step-icon-wrapper {
+  position: relative;
+  width: 100px;
+  height: 100px;
+  margin: 0 auto 2rem;
+}
+
+.step-number {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 28px;
+  height: 28px;
+  background: var(--primary);
+  color: var(--white);
+  font-family: var(--font-sans);
+  font-weight: 600;
+  font-size: 0.9rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 50%;
+  z-index: 2;
+  box-shadow: 0 0 0 4px var(--bg-color);
+}
+
+.step-icon {
+  width: 100%;
+  height: 100%;
+  background: radial-gradient(circle, rgba(227, 153, 161, 0.15) 0%, rgba(255,255,255,0.8) 100%);
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--secondary); /* The icon color in mockup is pinkish red */
+  border: 1px solid rgba(227, 153, 161, 0.3);
+  box-shadow: inset 0 0 20px rgba(255,255,255,0.5);
+}
+
+.text-primary {
+  color: #C26B76 !important; /* Deep rose matching the mockup icons */
+}
+
+.step-card h3 {
+  color: var(--neutral-dark);
+  font-size: 1.1rem;
+  margin-bottom: 0.75rem;
+  font-weight: 700;
+}
+
+.step-card p {
+  color: var(--neutral-gray);
+  font-size: 0.85rem;
+  line-height: 1.5;
+}
+
+@media (max-width: 992px) {
+  .steps-container {
+    grid-template-columns: repeat(2, 1fr);
+    gap: 4rem 2rem;
+  }
+  .connecting-line {
+    display: none;
+  }
+}
+
+@media (max-width: 576px) {
+  .steps-container {
+    grid-template-columns: 1fr;
+  }
+}

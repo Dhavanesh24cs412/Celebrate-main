@@ -2,10 +2,12 @@ import React, { createContext, useContext, useEffect, useState, useRef, ReactNod
 import { User } from '@supabase/supabase-js';
 import { supabase } from '../lib/supabase';
 import { Profile } from '../types';
+export type ProfileStatus = 'loading' | 'anonymous' | 'not_found' | 'ready' | 'error';
 
 interface AuthContextType {
   user: User | null;
   profile: Profile | null;
+  profileStatus: ProfileStatus;
   loading: boolean;
   error: string | null;
   refreshProfile: () => Promise<void>;
@@ -15,6 +17,7 @@ interface AuthContextType {
 const AuthContext = createContext<AuthContextType>({
   user: null,
   profile: null,
+  profileStatus: 'loading',
   loading: true,
   error: null,
   refreshProfile: async () => {},
@@ -24,11 +27,13 @@ const AuthContext = createContext<AuthContextType>({
 export const AuthProvider = ({ children }: { children: ReactNode }) => {
   const [user, setUser] = useState<User | null>(null);
   const [profile, setProfile] = useState<Profile | null>(null);
+  const [profileStatus, setProfileStatus] = useState<ProfileStatus>('loading');
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const isProfileLoadedRef = useRef(false);
 
   const fetchProfile = async (userId: string) => {
+    setProfileStatus('loading');
     try {
       const { data, error } = await supabase
         .from('profiles')
@@ -40,10 +45,12 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
         throw error;
       }
       setProfile(data || null);
+      setProfileStatus(data ? 'ready' : 'not_found');
       isProfileLoadedRef.current = true;
     } catch (err: any) {
       console.error('Error fetching profile:', err);
       setError(err.message);
+      setProfileStatus('error');
     }
   };
 
@@ -60,6 +67,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
           if (isMounted) {
             setUser(null);
             setProfile(null);
+            setProfileStatus('anonymous');
           }
           return;
         }
@@ -72,6 +80,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
           if (isMounted) {
             setUser(null);
             setProfile(null);
+            setProfileStatus('anonymous');
           }
           return;
         }
@@ -107,6 +116,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
           }
         } else {
           setProfile(null);
+          setProfileStatus('anonymous');
           setLoading(false); // Fixed: ensure loading resolves when logged out
         }
       }
@@ -125,7 +135,8 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
   return (
     <AuthContext.Provider value={{ 
       user, 
-      profile, 
+      profile,
+      profileStatus,
       loading, 
       error, 
       refreshProfile: async () => { if (user) await fetchProfile(user.id); },

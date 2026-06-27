@@ -5,6 +5,7 @@ import { NotificationProvider } from './contexts/NotificationContext';
 import { ProtectedRoute } from './routes/ProtectedRoute';
 
 import { Login } from './pages/Login';
+import { AuthCallback } from './pages/auth/AuthCallback';
 import { SelectRole } from './pages/SelectRole';
 import { ClientOnboarding } from './pages/onboarding/ClientOnboarding';
 import { PlannerOnboarding } from './pages/onboarding/PlannerOnboarding';
@@ -26,6 +27,9 @@ import { PlannerProjects } from './pages/events/PlannerProjects';
 import { PlannerProjectDetails } from './pages/events/PlannerProjectDetails';
 import { PlannerOverlays } from './pages/events/PlannerOverlays';
 import { Notifications } from './pages/Notifications';
+import { ClientProfile } from './pages/profile/ClientProfile';
+import { PlannerProfile } from './pages/profile/PlannerProfile';
+import { PublicPlannerProfile } from './pages/profile/PublicPlannerProfile';
 
 function App() {
   return (
@@ -35,6 +39,7 @@ function App() {
           <Routes>
           {/* Public Route */}
           <Route path="/login" element={<Login />} />
+          <Route path="/auth/callback" element={<AuthCallback />} />
 
           {/* Protected Routes without Layout (Onboarding) */}
           <Route element={<ProtectedRoute requireOnboarding={false} />}>
@@ -62,7 +67,8 @@ function App() {
               <Route path="/client/proposals" element={<ClientProposals />} />
               <Route path="/client/events/:eventId/proposals" element={<ProposalReview />} />
               <Route path="/client/booked" element={<ClientBookedEvents />} />
-              <Route path="/client/profile" element={<div>Profile Component Placeholder</div>} />
+              <Route path="/client/profile" element={<ClientProfile />} />
+              <Route path="/client/planners/:profileId" element={<PublicPlannerProfile />} />
               <Route path="/client/*" element={<Navigate to="/client/dashboard" replace />} />
             </Route>
           </Route>
@@ -78,7 +84,7 @@ function App() {
               <Route path="/planner/projects/:eventId" element={<PlannerProjectDetails />} />
               {/* Future Planner Routes Go Here */}
               <Route path="/planner/overlays" element={<PlannerOverlays />} />
-              <Route path="/planner/profile" element={<div>Profile Component Placeholder</div>} />
+              <Route path="/planner/profile" element={<PlannerProfile />} />
               <Route path="/planner/*" element={<Navigate to="/planner/dashboard" replace />} />
             </Route>
           </Route>

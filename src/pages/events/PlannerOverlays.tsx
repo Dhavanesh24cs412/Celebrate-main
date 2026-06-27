@@ -2,7 +2,9 @@ import React, { useState, useEffect, useRef } from 'react';
 import { useAuth } from '../../contexts/AuthContext';
 import { OverlayCollection, OverlayAsset } from '../../types';
 import { getOverlayCollections, createOverlayCollection, updateOverlayCollection, deleteOverlayCollection, getOverlayAssets, createOverlayAsset, deleteOverlayAsset, uploadAssetFile } from '../../lib/api/overlays';
-import { Layers, Plus, Trash2, ArrowLeft, UploadCloud, Search, Filter, Edit2, X, Image as ImageIcon, CheckCircle, AlertCircle } from 'lucide-react';
+import { Layers, Plus, Trash2, ArrowLeft, UploadCloud, Search, Filter, Edit2, X, Image as ImageIcon, CheckCircle, AlertCircle, Wand2 } from 'lucide-react';
+import { MagicCutModal } from '../../components/magic-cut/MagicCutModal';
+import { ExtractionResult, MagicCutLifecycleState, MagicCutService } from '../../lib/api/magicCut';
 
 const CATEGORIES = [
   'Furniture',
@@ -30,6 +32,8 @@ export const PlannerOverlays = () => {
   const [toast, setToast] = useState<{ message: string, type: 'success' | 'error' } | null>(null);
   const [collectionModal, setCollectionModal] = useState<{ isOpen: boolean, collection?: OverlayCollection }>({ isOpen: false });
   const [uploadModal, setUploadModal] = useState<{ isOpen: boolean, file: File | null, error: string | null }>({ isOpen: false, file: null, error: null });
+  const [isMagicCutOpen, setIsMagicCutOpen] = useState(false);
+  const [magicCutStatus, setMagicCutStatus] = useState<MagicCutLifecycleState>('starting');
   
   // Form State
   const [colName, setColName] = useState('');
@@ -47,6 +51,17 @@ export const PlannerOverlays = () => {
   useEffect(() => {
     if (profile?.id) loadCollections();
   }, [profile?.id]);
+
+  useEffect(() => {
+    let mounted = true;
+    const checkStatus = async () => {
+      const status = await MagicCutService.status();
+      if (mounted) setMagicCutStatus(status.state);
+    };
+    checkStatus();
+    const interval = setInterval(checkStatus, 10000);
+    return () => { mounted = false; clearInterval(interval); };
+  }, []);
 
   useEffect(() => {
     if (selectedCollection && profile?.id) loadAssets(selectedCollection.id);
@@ -130,10 +145,7 @@ export const PlannerOverlays = () => {
     setCollectionModal({ isOpen: true, collection: col });
   };
 
-  const handleFileSelect = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const file = e.target.files?.[0];
-    if (!file) return;
-
+  const processSelectedFile = (file: File) => {
     if (!ALLOWED_TYPES.includes(file.type)) {
       setUploadModal({ isOpen: true, file: null, error: 'Only PNG, SVG, and WEBP files are allowed.' });
       return;
@@ -146,7 +158,19 @@ export const PlannerOverlays = () => {
     setUploadModal({ isOpen: true, file, error: null });
     setAssetCategory(CATEGORIES[0]);
     setCustomCategory('');
+  };
+
+  const handleFileSelect = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    
+    processSelectedFile(file);
     if (fileInputRef.current) fileInputRef.current.value = '';
+  };
+
+  const handleMagicCutComplete = (result: ExtractionResult) => {
+    setIsMagicCutOpen(false);
+    processSelectedFile(result.asset.file);
   };
 
   const handleUploadAsset = async () => {
@@ -322,9 +346,24 @@ export const PlannerOverlays = () => {
             
             <div>
               <input type="file" ref={fileInputRef} className="hidden" accept="image/png, image/svg+xml, image/webp" onChange={handleFileSelect} />
-              <button onClick={() => fileInputRef.current?.click()} className="px-4 py-2 bg-primary text-white rounded-xl font-medium hover:bg-primary/90 transition-colors flex items-center gap-2 justify-center w-full sm:w-auto">
-                <UploadCloud className="w-4 h-4" /> Upload Asset
-              </button>
+              <div className="flex flex-col sm:flex-row items-center gap-2 w-full sm:w-auto">
+                <button 
+                  onClick={() => setIsMagicCutOpen(true)} 
+                  disabled={magicCutStatus === 'unavailable'}
+                  title={magicCutStatus === 'unavailable' ? 'AI Service Unavailable' : magicCutStatus === 'starting' ? 'AI Model Warming Up' : ''}
+                  className="px-4 py-2 bg-gradient-to-r from-indigo-500 to-purple-500 text-white rounded-xl font-medium hover:opacity-90 transition-opacity flex items-center gap-2 justify-center w-full sm:w-auto shadow-sm disabled:opacity-50 disabled:cursor-not-allowed"
+                >
+                  {magicCutStatus === 'starting' ? (
+                    <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
+                  ) : (
+                    <Wand2 className="w-4 h-4" />
+                  )}
+                  {magicCutStatus === 'starting' ? 'AI Starting...' : 'Extract with AI'}
+                </button>
+                <button onClick={() => fileInputRef.current?.click()} className="px-4 py-2 bg-primary text-white rounded-xl font-medium hover:bg-primary/90 transition-colors flex items-center gap-2 justify-center w-full sm:w-auto shadow-sm">
+                  <UploadCloud className="w-4 h-4" /> Upload Asset
+                </button>
+              </div>
             </div>
           </div>
 
@@ -477,6 +516,13 @@ export const PlannerOverlays = () => {
           </div>
         </div>
       )}
+
+      {/* Magic Cut Modal */}
+      <MagicCutModal 
+        isOpen={isMagicCutOpen} 
+        onClose={() => setIsMagicCutOpen(false)} 
+        onComplete={handleMagicCutComplete} 
+      />
     </div>
   );
 };
